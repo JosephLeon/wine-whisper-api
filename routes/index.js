@@ -12,7 +12,7 @@ router.get('/', function(req, res, next) {
 router.post('/api/v1/todos', (req, res, next) => {
   const results = [];
   // Grab data from http request
-  const data = {name: req.body.text, recommended: false, price: req.body.price};
+  const data = {name: req.body.name, recommended: false, price: req.body.price, year: req.body.year, rating: req.body.rating, company: req.body.company, description: req.body.description};
   // Get a Postgres client from the connection pool
   pg.connect(connectionString, (err, client, done) => {
     // Handle connection errors
