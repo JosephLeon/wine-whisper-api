@@ -3,11 +3,11 @@ const connectionString = process.env.DATABASE_URL || 'postgres://localhost:5432/
 
 const wines_schema = 'CREATE TABLE wines(id SERIAL PRIMARY KEY, \
       recommended BOOLEAN, \
-      name VARCHAR(40) not null, \
+      name VARCHAR(40), \
       price smallint, \
       year smallint, \
       rating smallint, \
-      company VARCHAR(40) not null, \
+      company VARCHAR(40), \
       description text)';
 
 // throw new Error("Something went badly wrong!");
