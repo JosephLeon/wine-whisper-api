@@ -2,9 +2,6 @@
   "name": "node-wine-api",
   "version": "0.0.0",
   "private": true,
-  // "scripts": {
-  //   "start": "node ./bin/www"
-  // },
   "scripts": {
     "start": "supervisor ./bin/www"
   },
