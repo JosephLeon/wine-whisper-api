@@ -5,15 +5,7 @@ const pg = require('pg');
 const path = require('path');
 const connectionString = process.env.DATABASE_URL || 'postgres://localhost:5432/wine_whisper_api';
 
-// const app = express();
-// app.use(function(req, res, next) {
-//   res.header("Access-Control-Allow-Origin", "*");
-//   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-//   next();
-// });
-
-var app = express();
- 
+var app = express(); 
 router.use(cors());
 
 /* GET home page. */
@@ -22,9 +14,6 @@ router.get('/', function(req, res, next) {
 });
 
 // Read
-// app.get('/api/v1/wines', function (req, res, next) {
-//   res.json({msg: 'This is CORS-enabled for all origins!'})
-// })
 router.get('/api/v1/wines', (req, res, next) => {
   const results = [];
   // Get a Postgres client from the connection pool
@@ -37,6 +26,34 @@ router.get('/api/v1/wines', (req, res, next) => {
     }
     // SQL Query > Select Data
     const query = client.query('SELECT * FROM wines ORDER BY id ASC;');
+    // Stream results back one row at a time
+    query.on('row', (row) => {
+      results.push(row);
+    });
+    // After all data is returned, close connection and return results
+    query.on('end', () => {
+      done();
+      return res.json(results);
+    });
+  });
+});
+
+// Get single Wine
+router.get('/api/v1/wines/:wine_id', (req, res, next) => {
+  const results = [];
+  // Grab data from the URL parameters
+  const id = req.params.wine_id;
+  // Get a Postgres client from the connection pool
+  pg.connect(connectionString, (err, client, done) => {
+    // Handle connection errors
+    if(err) {
+      done();
+      console.log(err);
+      return res.status(500).json({success: false, data: err});
+    }
+    // SQL Query > Select Data
+    const query = client.query('SELECT * FROM wines WHERE id=($1)', [id]);
+    // client.query('DELETE FROM items WHERE id=($1)', [id]);
     // Stream results back one row at a time
     query.on('row', (row) => {
       results.push(row);
@@ -149,5 +166,7 @@ router.delete('/api/v1/wines/:wine_id', (req, res, next) => {
 // company VARCHAR(40) not null, \
 // description text
 // curl --data "name=test&recommended=false&price=1999&year=2016&rating=3&company=wine%20Company&description=light flavour" http://127.0.0.1:3000/api/v1/todos
+// curl --data "name=Panfold Shiraz&recommended=true&price=1299&year=2014&rating=4&company=Penfolds&description=A dry wine" http://127.0.0.1:3000/api/v1/wines
+// curl --data "name=Huntingtons Pinot&recommended=true&price=1499&year=2015&rating=4&company=Huntingtons&description=An ok wine" http://127.0.0.1:3000/api/v1/wines
 
 module.exports = router;
